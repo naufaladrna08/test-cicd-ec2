@@ -1,0 +1,53 @@
+name: Build and Deploy Next.js App to EC2
+
+on:
+  push:
+    branches:
+      - main  # Adjust this to your main branch name
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Setup Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with: 
+          node-version: 18 
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Build the Next.js app
+      - name: Build Next.js app
+        run: npm run build
+
+      # Step 5: Archive build files
+      - name: Archive build
+        run: tar -czf build.tar.gz .next package.json public node_modules 
+
+      # Step 6: Deploy to EC2
+      - name: Deploy to EC2
+        env:
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+          KEY: ${{ secrets.EC2_KEY }}
+          APP_DIRECTORY: ${{ secrets.APP_DIRECTORY }}
+        run: |
+          echo "${KEY}" > securen-aws-pair.pem
+          chmod 600 securen-aws-pair.pem
+          scp -i securen-aws-pair.pem build.tar.gz $USER@$HOST:$APP_DIRECTORY/
+          ssh -i securen-aws-pair.pem $USER@$HOST << EOF
+            cd $APP_DIRECTORY
+            tar -xzf build.tar.gz
+            rm -rf build.tar.gz
+            pm2 stop nextjs || true
+            pm2 start npm --name "nextjs" -- start
+          EOF
