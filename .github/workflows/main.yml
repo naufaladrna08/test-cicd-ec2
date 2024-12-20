@@ -43,9 +43,9 @@ jobs:
       run: |
         echo "$SSH_PRIVATE_KEY" > ssh_key
         chmod 600 ssh_key
-        ssh -t -i ssh_key $VPS_USER@$VPS_HOST \
-          "docker pull naufaladrna08/app-next-test:latest; \
-          docker stop app-next-test || true; \
-          docker rm app-next-test || true; \
-          docker run -d --name app-next-test -p 80:3000 --restart always naufaladrna08/app-next-test:latest; \
-          docker image prune -f"
+        bash -c "ssh -t -i ssh_key $VPS_USER@$VPS_HOST \
+          \"docker pull naufaladrna08/app-next-test:latest && \
+          docker stop app-next-test || true && \
+          docker rm app-next-test || true && \
+          docker run -d --name app-next-test -p 80:3000 --restart always naufaladrna08/app-next-test:latest && \
+          docker image prune -f\""
