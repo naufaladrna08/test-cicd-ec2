@@ -46,5 +46,5 @@ jobs:
           docker pull naufaladrna08/app-next-test:latest
           docker stop app-next-test
           docker rm app-next-test
-          docker run -d --name app-next-test -p 3000:3000 --restart always naufaladrna08/app-next-test:latest
+          docker run -d --name app-next-test -p 80:3000 --restart always naufaladrna08/app-next-test:latest
           docker image prune -f
