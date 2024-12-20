@@ -21,14 +21,7 @@ jobs:
       with:
         node-version: '18' # Use the Node.js version compatible with your project
 
-    # Step 3: Install dependencies and build the Next.js app
-    - name: Install Dependencies
-      run: npm install
-
-    - name: Build Next.js App
-      run: npm run build
-
-    # Step 4: Set up Docker for building and pushing the image
+    # Step 3: Set up Docker for building and pushing the image
     - name: Log in to DockerHub
       uses: docker/login-action@v2
       with:
@@ -41,7 +34,7 @@ jobs:
     - name: Push Docker Image to DockerHub
       run: docker push naufaladrna08/app-next-test:latest
 
-    # Step 5: Deploy to VPS
+    # Step 4: Deploy to VPS
     - name: Deploy to VPS
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} # Add your private key to GitHub Secrets
@@ -50,10 +43,9 @@ jobs:
       run: |
         echo "$SSH_PRIVATE_KEY" > ssh_key
         chmod 600 ssh_key
-        ssh -i ssh_key $VPS_USER@$VPS_HOST << 'EOF'
-          docker pull naufaladrna08/app-next-test:latest
-          docker stop app-next-test || true
-          docker rm app-next-test || true
-          docker run -d --name app-next-test -p 80:3000 --restart always naufaladrna08/app-next-test:latest
-          docker image prune -f
-        EOF
+        ssh -t -i ssh_key $VPS_USER@$VPS_HOST \
+          "docker pull naufaladrna08/app-next-test:latest; \
+          docker stop app-next-test || true; \
+          docker rm app-next-test || true; \
+          docker run -d --name app-next-test -p 80:3000 --restart always naufaladrna08/app-next-test:latest; \
+          docker image prune -f"
