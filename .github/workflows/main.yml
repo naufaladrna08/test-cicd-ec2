@@ -6,9 +6,8 @@ on:
       - main  # Trigger on pushes to the `main` branch
 
 jobs:
-  publish:
-    environment: EC2
   build-and-deploy:
+    environment: EC2
     runs-on: ubuntu-latest
 
     steps:
