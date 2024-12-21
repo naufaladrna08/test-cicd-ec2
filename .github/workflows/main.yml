@@ -1,10 +1,10 @@
 name: CI/CD for Next.js App
 
 on:
-  push:
+  pull_request:
     branches:
-      - main  # Trigger on pushes to the `main` branch
-
+    - main
+  
 jobs:
   build-docker-image:
     environment: EC2
